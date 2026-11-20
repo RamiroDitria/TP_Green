@@ -68,7 +68,7 @@
       turnos: 7,            // Resolución 2126/25, Calendario Académico 2026
       hojasPorActa: 3,      // acta triple (indicación de la cátedra)
       pesoHojaKg: 0.005,    // A4 80 g/m² ≈ 0,0624 m² × 80 g/m² ≈ 5 g (supuesto)
-      densidadJabon: 1.0    // kg/L, sólo si el jabón se carga en litros (supuesto, citar fuente)
+      densidadJabon: 1.04   // kg/L, sólo si el jabón se carga en litros (SDS 1503, Rentokil Initial, 2023: 1,021 a 1,061 g/mL)
     },
 
     calidades: ['medido', 'estimado', 'supuesto'],
@@ -78,11 +78,16 @@
     respaldo: {
       periodos: [{ id: 'local-2026', anio: 2026, nombre: '2026' }],
       edificios: [
-        { id: 'local-1', nombre: 'Edificio 1' },
-        { id: 'local-2', nombre: 'Edificio 2' },
-        { id: 'local-3', nombre: 'Edificio 3' },
-        { id: 'local-4', nombre: 'Edificio 4' },
-        { id: 'local-5', nombre: 'Edificio 5' }
+        { id: 'local-1', nombre: 'Edificio 1: Central' },
+        { id: 'local-2', nombre: 'Edificio 2: Ing. Soro' },
+        { id: 'local-3', nombre: 'Edificio 3: Ing. Possetto' },
+        { id: 'local-4', nombre: 'Edificio 4: Ing. Inchaurrondo' },
+        { id: 'local-5', nombre: 'Edificio 5: Dr. Gallardo / Biblioteca' },
+        { id: 'local-6', nombre: 'Edificio 6: Ing. Maders' },
+        { id: 'local-7', nombre: 'Edificio 7: Ing. Sueldo' },
+        { id: 'local-8', nombre: 'Edificio 8: Ing. Irico - Dr. Sananez' },
+        { id: 'local-9', nombre: 'Comedor' },
+        { id: 'local-10', nombre: 'Edificio Malvinas' }
       ]
     },
 

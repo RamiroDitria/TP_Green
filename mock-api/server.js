@@ -26,11 +26,16 @@ const periodos = [
 ];
 
 const edificios = [
-  { id: 1, nombre: 'Edificio 1' },
-  { id: 2, nombre: 'Edificio 2' },
-  { id: 3, nombre: 'Edificio 3' },
-  { id: 4, nombre: 'Edificio 4' },
-  { id: 5, nombre: 'Edificio 5' }
+  { id: 1, nombre: 'Edificio 1: Central' },
+  { id: 2, nombre: 'Edificio 2: Ing. Soro' },
+  { id: 3, nombre: 'Edificio 3: Ing. Possetto' },
+  { id: 4, nombre: 'Edificio 4: Ing. Inchaurrondo' },
+  { id: 5, nombre: 'Edificio 5: Dr. Gallardo / Biblioteca' },
+  { id: 6, nombre: 'Edificio 6: Ing. Maders' },
+  { id: 7, nombre: 'Edificio 7: Ing. Sueldo' },
+  { id: 8, nombre: 'Edificio 8: Ing. Irico - Dr. Sananez' },
+  { id: 9, nombre: 'Comedor' },
+  { id: 10, nombre: 'Edificio Malvinas' }
 ];
 
 const unidades = [
@@ -40,20 +45,21 @@ const unidades = [
 ];
 
 const fuentes = [
-  { id: 1, nombre: 'Facturas de compra (Dirección de Compras)' },
-  { id: 2, nombre: 'Relevamiento propio del Grupo 8' },
-  { id: 3, nombre: 'Área de Mantenimiento e Higiene' }
+  { id: 1, nombre: 'Planes de estudio de la UTN (aproximación)' },
+  { id: 2, nombre: 'Recorrido y planos de la Facultad' },
+  { id: 3, nombre: 'Fichas técnicas de insumos (supuesto)' },
+  { id: 4, nombre: 'Área de Mantenimiento o Compras de la Facultad' }
 ];
 
-// Valores de referencia tomados de bases públicas (ADEME / DEFRA) sólo para
-// simular el módulo: no son los que va a entregar la cátedra.
+// VALORES DE PRUEBA: sirven sólo para simular el módulo. No provienen de una fuente
+// oficial ni son los que va a entregar la cátedra. Se reemplazan por los de la API real.
 const factores = [
-  { id: 1, bien: 'papel', valor: 0.88, unidad: 'kg CO2e/kg', fuente: 'ADEME Base Empreinte 2024', anio: 2024 },
-  { id: 2, bien: 'papel', valor: 0.91, unidad: 'kg CO2e/kg', fuente: 'ADEME Base Empreinte 2024', anio: 2025 },
-  { id: 3, bien: 'papel', valor: 0.93, unidad: 'kg CO2e/kg', fuente: 'ADEME Base Empreinte 2024', anio: 2026 },
+  { id: 1, bien: 'papel', valor: 0.88, unidad: 'kg CO2e/kg', fuente: 'Factor de prueba (API simulada)', anio: 2024 },
+  { id: 2, bien: 'papel', valor: 0.91, unidad: 'kg CO2e/kg', fuente: 'Factor de prueba (API simulada)', anio: 2025 },
+  { id: 3, bien: 'papel', valor: 0.93, unidad: 'kg CO2e/kg', fuente: 'Factor de prueba (API simulada)', anio: 2026 },
   // Sin factor 2026 a propósito: ejercita el "se usa el más reciente anterior" del README.
-  { id: 4, bien: 'jabon liquido', valor: 1.15, unidad: 'kg CO2e/kg', fuente: 'DEFRA 2024 GHG Conversion Factors', anio: 2024 },
-  { id: 5, bien: 'jabon liquido', valor: 1.18, unidad: 'kg CO2e/kg', fuente: 'DEFRA 2024 GHG Conversion Factors', anio: 2025 }
+  { id: 4, bien: 'jabon liquido', valor: 1.15, unidad: 'kg CO2e/kg', fuente: 'Factor de prueba (API simulada)', anio: 2024 },
+  { id: 5, bien: 'jabon liquido', valor: 1.18, unidad: 'kg CO2e/kg', fuente: 'Factor de prueba (API simulada)', anio: 2025 }
 ];
 
 // ---------- Estado mutable (datos de actividad y resultados) ----------

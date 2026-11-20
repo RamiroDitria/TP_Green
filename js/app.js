@@ -113,12 +113,17 @@
   // Conexión y catálogos
   // ======================================================================
 
+  // La API de prueba local (mock-api, en localhost) no es la API central de la cátedra:
+  // se detecta por la dirección para no mostrarla como si lo fuera.
+  function esSimulada() { return /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(api.baseUrl()); }
+  function nombreApi() { return esSimulada() ? 'API simulada' : 'API central'; }
+
   function pintarEstadoConexion() {
     const el = $('#estadoApi');
     el.dataset.estado = estado.conexion;
     const textos = {
       pendiente: 'Revisando la conexión…',
-      ok: 'API central conectada',
+      ok: esSimulada() ? 'API simulada conectada (factores de prueba)' : 'API central conectada',
       error: 'Sin respuesta de la API',
       'sin-configurar': 'API sin configurar'
     };
@@ -130,7 +135,7 @@
       aviso.innerHTML = '<p>Falta la dirección de la API central. Podés completar los formularios y ver el cálculo con un factor cargado a mano, pero no se envía nada hasta conectarla. <button type="button" class="enlace" data-ir="conexion">Cargar la dirección</button></p>';
       aviso.hidden = false;
     } else if (estado.conexion === 'error') {
-      aviso.innerHTML = '<p>' + esc(estado.errorConexion) + ' Lo que cargues queda guardado en este navegador y no se envía hasta que la API responda. <button type="button" class="enlace" data-reintentar="1">Reintentar ahora</button></p>';
+      aviso.innerHTML = '<p>' + esc(estado.errorConexion) + ' Lo que cargues queda guardado en este navegador y no se envía hasta que la API responda. <button type="button" class="enlace" data-ir="conexion">Revisar la conexión</button></p>';
       aviso.hidden = false;
     } else {
       aviso.hidden = true;
@@ -254,7 +259,7 @@
         origen = '';
         cuerpo = '<p class="factor-detalle">Elegí un período para consultar el factor.</p>';
       } else if (f.estado === 'ok') {
-        origen = 'API central' + (f.factor.anio ? ', ' + f.factor.anio : '');
+        origen = nombreApi() + (f.factor.anio ? ', ' + f.factor.anio : '');
         cuerpo = '<p class="factor-valor">' + esc(textoFactor(f.factor)) + '</p>' +
           '<p class="factor-detalle">' + (f.factor.fuente ? 'Fuente: ' + esc(f.factor.fuente) + '. ' : '') + esc(USO_BIEN[bien]) + '.</p>' +
           (f.nota ? '<p class="factor-detalle">' + esc(f.nota) + '</p>' : '');
@@ -645,7 +650,7 @@
     if (!f) return '<p>FE ' + (bien === 'papel' ? 'papel' : 'jabón') + ': sin dato</p>';
     let conv = '';
     try { const nf = calc.normalizarFactor(f); if (nf.pasos.length) conv = ' (' + fmt(nf.valor) + ' kg CO₂e/' + nf.por + ')'; } catch (e) { conv = ' (unidad no reconocida)'; }
-    const origen = f.origen === 'API' ? 'API central' : 'cargado a mano, supuesto';
+    const origen = f.origen === 'API' ? nombreApi() : 'cargado a mano, supuesto';
     return '<p' + (f.origen === 'API' ? '' : ' class="supuesto"') + '>FE ' + (bien === 'papel' ? 'papel' : 'jabón') + ': ' + esc(textoFactor(f)) + esc(conv) + ', ' + esc(origen) + (f.anio ? ', ' + esc(f.anio) : '') + (f.fuente ? '. ' + esc(f.fuente) : '') + '</p>';
   }
 
@@ -1184,8 +1189,6 @@
     document.addEventListener('click', (ev) => {
       const b = ev.target.closest('[data-ir]');
       if (b) C.irA(b.dataset.ir);
-      const r = ev.target.closest('[data-reintentar]');
-      if (r) conectar();
     });
 
     let resizeTimer;
