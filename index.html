@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus CO₂ | Módulo 8: Compras y cadena de suministro</title>
+  <meta name="description" content="Módulo de carga, cálculo y visualización de emisiones de Alcance 3 (compras) de la UTN Facultad Regional Córdoba.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Ir al contenido</a>
+
+  <header class="cabecera">
+    <div class="cabecera-int">
+      <div class="marca">
+        <p class="proyecto">Campus CO₂, UTN Facultad Regional Córdoba</p>
+        <h1>Compras y cadena de suministro</h1>
+        <p class="bajada">Módulo 8. Emisiones de Alcance 3, categoría 1: lo que cuesta fabricar los bienes que compra la Facultad.</p>
+      </div>
+      <p class="estado-api" id="estadoApi" data-estado="pendiente">
+        <span class="estado-icono" aria-hidden="true"></span>
+        <span id="estadoApiTexto">Revisando la conexión…</span>
+      </p>
+    </div>
+    <nav class="pestanas" role="tablist" aria-label="Secciones del módulo">
+      <button role="tab" id="tab-carga" aria-controls="panel-carga" aria-selected="true">Cargar datos</button>
+      <button role="tab" id="tab-resultados" aria-controls="panel-resultados" aria-selected="false" tabindex="-1">Resultados</button>
+      <button role="tab" id="tab-registros" aria-controls="panel-registros" aria-selected="false" tabindex="-1">Registros</button>
+      <button role="tab" id="tab-metodologia" aria-controls="panel-metodologia" aria-selected="false" tabindex="-1">Metodología</button>
+      <button role="tab" id="tab-conexion" aria-controls="panel-conexion" aria-selected="false" tabindex="-1">Conexión</button>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <div class="aviso-global" id="avisoGlobal" hidden></div>
+
+    <!-- ============ CARGA ============ -->
+    <section class="panel" id="panel-carga" role="tabpanel" aria-labelledby="tab-carga">
+      <div class="carga-encabezado">
+        <div class="campo campo-periodo">
+          <label for="periodo">Período de medición</label>
+          <select id="periodo" aria-describedby="periodo-error"></select>
+          <p class="error" id="periodo-error"></p>
+        </div>
+        <div class="factores" id="factores" aria-live="polite"></div>
+      </div>
+
+      <div class="selector-form" role="group" aria-label="Rubro a cargar">
+        <button type="button" class="opcion" data-form="actas" aria-pressed="true">
+          <span class="opcion-titulo">Actas de examen</span>
+          <span class="opcion-desc">Papel de las actas, por departamento</span>
+        </button>
+        <button type="button" class="opcion" data-form="higiene" aria-pressed="false">
+          <span class="opcion-titulo">Higiene sanitaria</span>
+          <span class="opcion-desc">Papel higiénico y jabón, por edificio</span>
+        </button>
+      </div>
+
+      <div class="carga-grid">
+        <div class="carga-forms">
+
+          <!-- Formulario A: actas de examen -->
+          <form id="formActas" class="formulario" novalidate>
+            <fieldset class="grupo">
+              <legend>Parámetros del cálculo</legend>
+              <p class="ayuda">Valen para todos los departamentos de este envío.</p>
+              <div class="fila-campos">
+                <div class="campo">
+                  <label for="turnos">Turnos de examen al año</label>
+                  <input id="turnos" name="turnos" inputmode="numeric" autocomplete="off" aria-describedby="turnos-ayuda turnos-error">
+                  <p class="pista" id="turnos-ayuda">Resolución 2126/25: 7 turnos en 2026</p>
+                  <p class="error" id="turnos-error"></p>
+                </div>
+                <div class="campo">
+                  <label for="hojasPorActa">Hojas por acta</label>
+                  <input id="hojasPorActa" name="hojasPorActa" inputmode="numeric" autocomplete="off" aria-describedby="hojasPorActa-ayuda hojasPorActa-error">
+                  <p class="pista" id="hojasPorActa-ayuda">Acta triple</p>
+                  <p class="error" id="hojasPorActa-error"></p>
+                </div>
+                <div class="campo">
+                  <label for="pesoHojaKg">Peso por hoja (kg)</label>
+                  <input id="pesoHojaKg" name="pesoHojaKg" inputmode="decimal" autocomplete="off" aria-describedby="pesoHojaKg-ayuda pesoHojaKg-error">
+                  <p class="pista" id="pesoHojaKg-ayuda">A4 de 80 g/m², unos 5 g</p>
+                  <p class="error" id="pesoHojaKg-error"></p>
+                </div>
+              </div>
+              <div class="fila-campos">
+                <div class="campo">
+                  <label for="fuenteActas">Fuente de las cátedras</label>
+                  <select id="fuenteActas" name="fuenteActas" aria-describedby="fuenteActas-error"></select>
+                  <p class="error" id="fuenteActas-error"></p>
+                </div>
+                <div class="campo">
+                  <label for="calidadActas">Calidad del dato</label>
+                  <select id="calidadActas" name="calidadActas" aria-describedby="calidadActas-error"></select>
+                  <p class="error" id="calidadActas-error"></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="grupo">
+              <legend>Cátedras activas por departamento</legend>
+              <p class="ayuda">Dejá vacío el departamento que todavía no relevaron: no se envía.</p>
+              <div class="tabla-scroll">
+                <table class="tabla-carga">
+                  <thead>
+                    <tr><th scope="col">Departamento</th><th scope="col" class="num">Cátedras</th><th scope="col" class="num">Hojas</th><th scope="col" class="num">kg CO₂e</th></tr>
+                  </thead>
+                  <tbody id="filasActas"></tbody>
+                  <tfoot>
+                    <tr><th scope="row">Total</th><td class="num" id="totCatedras">0</td><td class="num" id="totHojas">0</td><td class="num" id="totKgActas">—</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+              <p class="error" id="filasActas-error"></p>
+            </fieldset>
+
+            <div class="acciones">
+              <button type="submit" class="btn btn-primario">Calcular y enviar</button>
+              <button type="button" class="btn btn-secundario" data-vaciar="actas">Vaciar formulario</button>
+              <p class="estado-envio" id="estadoActas" aria-live="polite"></p>
+            </div>
+          </form>
+
+          <!-- Formulario B: higiene sanitaria -->
+          <form id="formHigiene" class="formulario" novalidate hidden>
+            <fieldset class="grupo">
+              <legend>Consumo anual por baño</legend>
+              <p class="ayuda">Se supone el mismo consumo en todos los edificios.</p>
+              <div class="fila-campos">
+                <div class="campo">
+                  <label for="consumoPH">Papel higiénico (kg por baño)</label>
+                  <input id="consumoPH" name="consumoPH" inputmode="decimal" autocomplete="off" aria-describedby="consumoPH-error">
+                  <p class="error" id="consumoPH-error"></p>
+                </div>
+                <div class="campo campo-con-unidad">
+                  <label for="consumoJabon">Jabón líquido (por baño)</label>
+                  <div class="entrada-unidad">
+                    <input id="consumoJabon" name="consumoJabon" inputmode="decimal" autocomplete="off" aria-describedby="consumoJabon-error">
+                    <select id="unidadJabon" name="unidadJabon" aria-label="Unidad del jabón">
+                      <option value="kg">kg</option>
+                      <option value="L">L</option>
+                    </select>
+                  </div>
+                  <p class="error" id="consumoJabon-error"></p>
+                </div>
+                <div class="campo" id="campoDensidad" hidden>
+                  <label for="densidadJabon">Densidad del jabón (kg/L)</label>
+                  <input id="densidadJabon" name="densidadJabon" inputmode="decimal" autocomplete="off" aria-describedby="densidadJabon-ayuda densidadJabon-error">
+                  <p class="pista" id="densidadJabon-ayuda">Supuesto cercano a 1 kg/L. Sólo se usa si el factor del jabón está por kg.</p>
+                  <p class="error" id="densidadJabon-error"></p>
+                </div>
+              </div>
+              <div class="fila-campos">
+                <div class="campo">
+                  <label for="fuenteHigiene">Fuente del dato</label>
+                  <select id="fuenteHigiene" name="fuenteHigiene" aria-describedby="fuenteHigiene-error"></select>
+                  <p class="error" id="fuenteHigiene-error"></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="grupo">
+              <legend>Plantas y baños por edificio</legend>
+              <p class="ayuda">Dejá vacío el edificio que todavía no relevaron: no se envía.</p>
+              <div class="tabla-scroll">
+                <table class="tabla-carga">
+                  <thead>
+                    <tr><th scope="col">Edificio</th><th scope="col" class="num">Plantas</th><th scope="col" class="num">Baños por planta</th><th scope="col" class="num">Baños</th><th scope="col">Calidad</th><th scope="col" class="num">kg CO₂e</th></tr>
+                  </thead>
+                  <tbody id="filasHigiene"></tbody>
+                  <tfoot>
+                    <tr><th scope="row">Total</th><td></td><td></td><td class="num" id="totBanos">0</td><td></td><td class="num" id="totKgHigiene">—</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+              <p class="error" id="filasHigiene-error"></p>
+            </fieldset>
+
+            <div class="acciones">
+              <button type="submit" class="btn btn-primario">Calcular y enviar</button>
+              <button type="button" class="btn btn-secundario" data-vaciar="higiene">Vaciar formulario</button>
+              <p class="estado-envio" id="estadoHigiene" aria-live="polite"></p>
+            </div>
+          </form>
+        </div>
+
+        <aside class="comprobante" aria-labelledby="comp-titulo">
+          <div class="comprobante-papel">
+            <div class="comp-cabecera">
+              <h2 id="comp-titulo">Comprobante de cálculo</h2>
+              <p id="compSub"></p>
+            </div>
+            <ol class="comp-pasos" id="compPasos"></ol>
+            <div class="comp-factores" id="compFactores"></div>
+            <div class="comp-total">
+              <span>Total</span>
+              <strong id="compKg">—</strong>
+              <span id="compT"></span>
+            </div>
+            <p class="comp-pie" id="compPie">Se actualiza mientras completás el formulario. Se guarda con cada resultado como trazabilidad.</p>
+            <div class="sello" id="sello" hidden aria-live="polite"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ RESULTADOS ============ -->
+    <section class="panel" id="panel-resultados" role="tabpanel" aria-labelledby="tab-resultados" hidden>
+      <div class="filtros">
+        <div class="campo">
+          <label for="resPeriodo">Período</label>
+          <select id="resPeriodo"></select>
+        </div>
+        <button type="button" class="btn btn-secundario" id="btnActualizar">Actualizar desde la API</button>
+        <p class="filtros-estado" id="resEstado" aria-live="polite"></p>
+      </div>
+      <div id="resAvisos"></div>
+
+      <div class="res-cabecera">
+        <div class="hero">
+          <p class="hero-valor"><span id="kpiTotal">—</span> <span class="hero-unidad">t CO₂e</span></p>
+          <p class="hero-desc" id="kpiDesc">Emisiones del módulo en el año.</p>
+        </div>
+        <dl class="tiles">
+          <div class="tile">
+            <dt>kg CO₂e por cátedra</dt>
+            <dd id="kpiCatedra">—</dd>
+            <p class="tile-nota" id="kpiCatedraNota"></p>
+          </div>
+          <div class="tile">
+            <dt>kg CO₂e por baño</dt>
+            <dd id="kpiBano">—</dd>
+            <p class="tile-nota" id="kpiBanoNota"></p>
+          </div>
+          <div class="tile">
+            <dt>Papel de actas</dt>
+            <dd id="kpiPapel">—</dd>
+            <p class="tile-nota" id="kpiPapelNota"></p>
+          </div>
+          <div class="tile">
+            <dt>Actas con 10 turnos</dt>
+            <dd id="kpiEscenario">—</dd>
+            <p class="tile-nota" id="kpiEscenarioNota">Si se suman los turnos 8, 9 y 10 del ciclo anterior</p>
+          </div>
+        </dl>
+      </div>
+
+      <article class="tarjeta">
+        <h2 class="tarjeta-titulo">Distribución por rubro</h2>
+        <p class="tarjeta-sub">Parte de cada rubro en el total del año</p>
+        <div id="grafRubro"></div>
+      </article>
+
+      <div class="dos-col">
+        <article class="tarjeta">
+          <h2 class="tarjeta-titulo">Emisiones por departamento</h2>
+          <p class="tarjeta-sub">Actas de examen, kg CO₂e</p>
+          <div id="grafDepto"></div>
+          <details class="ver-datos"><summary>Ver datos en tabla</summary><div id="tablaDepto"></div></details>
+        </article>
+        <article class="tarjeta">
+          <h2 class="tarjeta-titulo">Emisiones por edificio</h2>
+          <p class="tarjeta-sub">Higiene sanitaria, kg CO₂e</p>
+          <div id="grafEdificio"></div>
+          <details class="ver-datos"><summary>Ver datos en tabla</summary><div id="tablaEdificio"></div></details>
+        </article>
+      </div>
+
+      <article class="tarjeta">
+        <h2 class="tarjeta-titulo">Evolución anual</h2>
+        <p class="tarjeta-sub">kg CO₂e por rubro y por período cargado</p>
+        <div id="grafEvolucion"></div>
+      </article>
+
+      <article class="tarjeta">
+        <div class="tarjeta-fila">
+          <div>
+            <h2 class="tarjeta-titulo">Resultados del cálculo</h2>
+            <p class="tarjeta-sub">Misma estructura que la Tabla 14 del informe</p>
+          </div>
+          <button type="button" class="btn btn-secundario" id="btnCopiarTabla">Copiar tabla</button>
+        </div>
+        <div class="tabla-scroll" id="tablaResultados"></div>
+      </article>
+    </section>
+
+    <!-- ============ REGISTROS ============ -->
+    <section class="panel" id="panel-registros" role="tabpanel" aria-labelledby="tab-registros" hidden>
+      <div class="filtros">
+        <div class="campo">
+          <label for="regPeriodo">Período</label>
+          <select id="regPeriodo"></select>
+        </div>
+        <div class="campo">
+          <label for="regRubro">Rubro</label>
+          <select id="regRubro"></select>
+        </div>
+        <button type="button" class="btn btn-secundario" id="btnCsv">Descargar CSV</button>
+        <button type="button" class="btn btn-secundario" id="btnJson">Descargar JSON</button>
+        <p class="filtros-estado" id="regEstado" aria-live="polite"></p>
+      </div>
+      <div class="tabla-scroll">
+        <table class="tabla-datos" id="tablaRegistros"></table>
+      </div>
+    </section>
+
+    <!-- ============ METODOLOGÍA ============ -->
+    <section class="panel texto" id="panel-metodologia" role="tabpanel" aria-labelledby="tab-metodologia" hidden>
+      <div class="metodo">
+        <h2>Qué mide el módulo</h2>
+        <p>La masa de bienes de uso diario que la Facultad compra en un año y las emisiones de su fabricación, en kg y en toneladas de CO₂e. Son emisiones de <strong>Alcance 3, categoría 1</strong> del GHG Protocol: se generan en la cadena de los proveedores, no en la Facultad. La periodicidad es anual.</p>
+
+        <h3>Rubro A: actas de examen</h3>
+        <ol class="formulas" start="1">
+          <li><span class="f">(1)</span> Hojas = Σ<sub>d</sub> (C<sub>d</sub> × T × H)</li>
+          <li><span class="f">(2)</span> Papel<sub>actas</sub> (kg) = Hojas × m</li>
+          <li><span class="f">(3)</span> E<sub>A</sub> (kg CO₂e) = Papel<sub>actas</sub> × FE<sub>papel</sub></li>
+        </ol>
+        <h3>Rubro B: higiene sanitaria</h3>
+        <ol class="formulas" start="4">
+          <li><span class="f">(4)</span> Baños = Σ<sub>e</sub> (P<sub>e</sub> × B<sub>e</sub>)</li>
+          <li><span class="f">(5)</span> Papel<sub>higiénico</sub> (kg) = Baños × c<sub>PH</sub> &nbsp;&nbsp; Jabón = Baños × c<sub>J</sub></li>
+          <li><span class="f">(6)</span> E<sub>B</sub> (kg CO₂e) = Papel<sub>higiénico</sub> × FE<sub>papel</sub> + Jabón × FE<sub>jabón</sub></li>
+        </ol>
+        <h3>Total</h3>
+        <ol class="formulas" start="7">
+          <li><span class="f">(7)</span> E<sub>total</sub> = E<sub>A</sub> + E<sub>B</sub> &nbsp;&nbsp; E<sub>total</sub> (t) = E<sub>total</sub> / 1000</li>
+        </ol>
+
+        <h3>Variables</h3>
+        <div class="tabla-scroll">
+          <table class="tabla-datos">
+            <thead><tr><th scope="col">Variable</th><th scope="col">Símbolo</th><th scope="col">Unidad</th><th scope="col">Origen</th></tr></thead>
+            <tbody>
+              <tr><td>Cátedras activas del departamento</td><td>C<sub>d</sub></td><td>cátedras</td><td>Sitio web de la Facultad</td></tr>
+              <tr><td>Turnos de examen al año</td><td>T</td><td>turnos</td><td>Resolución 2126/25</td></tr>
+              <tr><td>Hojas por acta</td><td>H</td><td>hojas</td><td>Cátedra (acta triple)</td></tr>
+              <tr><td>Peso por hoja</td><td>m</td><td>kg</td><td>Supuesto: A4 de 80 g/m²</td></tr>
+              <tr><td>Plantas del edificio</td><td>P<sub>e</sub></td><td>plantas</td><td>Relevamiento</td></tr>
+              <tr><td>Baños por planta</td><td>B<sub>e</sub></td><td>baños</td><td>Relevamiento</td></tr>
+              <tr><td>Consumo de papel higiénico por baño</td><td>c<sub>PH</sub></td><td>kg/año</td><td>Supuesto</td></tr>
+              <tr><td>Consumo de jabón por baño</td><td>c<sub>J</sub></td><td>kg o L/año</td><td>Supuesto</td></tr>
+              <tr><td>Factor de emisión del papel</td><td>FE<sub>papel</sub></td><td>kg CO₂e/kg</td><td>API central</td></tr>
+              <tr><td>Factor de emisión del jabón</td><td>FE<sub>jabón</sub></td><td>kg CO₂e/kg o /L</td><td>API central</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Cómo se guardan los datos</h3>
+        <ul>
+          <li>Cada departamento cargado genera un <strong>dato de actividad</strong> con el rubro «Papelería de actas», sin edificio, y su cantidad en kg de papel.</li>
+          <li>Cada edificio genera dos datos de actividad: papel higiénico (kg) y jabón líquido (kg o L).</li>
+          <li>Por cada dato se guarda un <strong>resultado de emisión</strong> enlazado al factor usado, con la trazabilidad completa: entradas, factor, fórmulas, conversiones y fecha.</li>
+          <li>Los factores no se copian al módulo: se consultan a la API en cada cálculo. Los totales por rubro, departamento y edificio se calculan al visualizar.</li>
+        </ul>
+
+        <h3>Supuestos principales</h3>
+        <ul>
+          <li>Cada cátedra toma examen en todos los turnos: el rubro A es un límite superior.</li>
+          <li>Se cuentan 7 turnos. Con 10 turnos el rubro A sube un 43 %; la pestaña Resultados muestra ese escenario.</li>
+          <li>El papel higiénico usa el factor del papel, por indicación de la cátedra.</li>
+          <li>El consumo por baño es el mismo en todos los edificios. Es el dato con más incertidumbre.</li>
+          <li>Si la API no tiene el factor de un bien, se carga a mano con su fuente y año y queda marcado como supuesto en la trazabilidad.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ CONEXIÓN ============ -->
+    <section class="panel texto" id="panel-conexion" role="tabpanel" aria-labelledby="tab-conexion" hidden>
+      <div class="metodo">
+        <h2>Conexión con la API central</h2>
+        <p>El módulo no tiene servidor ni API propia. Lee catálogos y factores de emisión de la API REST de la cátedra y le envía los datos de actividad y los resultados.</p>
+        <form id="formConexion" class="formulario conexion" novalidate>
+          <div class="campo">
+            <label for="baseUrl">Dirección base de la API</label>
+            <input id="baseUrl" type="url" placeholder="https://…/api/v1" autocomplete="off" spellcheck="false" aria-describedby="baseUrl-ayuda baseUrl-error">
+            <p class="pista" id="baseUrl-ayuda">Se guarda en este navegador. Para dejarla fija, completala en js/config.js.</p>
+            <p class="error" id="baseUrl-error"></p>
+          </div>
+          <div class="acciones">
+            <button type="submit" class="btn btn-primario">Guardar y probar conexión</button>
+            <p class="estado-envio" id="estadoConexion" aria-live="polite"></p>
+          </div>
+        </form>
+        <h3>Operaciones que usa el módulo</h3>
+        <div class="tabla-scroll">
+          <table class="tabla-datos" id="tablaEndpoints"></table>
+        </div>
+        <p class="nota">Las rutas y los nombres de campos se ajustan en <code>js/config.js</code> y en los adaptadores de <code>js/api.js</code>. No se guardan credenciales en el código.</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dlgConfirmar" class="dialogo" aria-labelledby="dlgConfirmarTitulo">
+    <form method="dialog">
+      <h2 id="dlgConfirmarTitulo">Ya hay datos cargados</h2>
+      <div id="dlgConfirmarCuerpo"></div>
+      <div class="acciones">
+        <button value="enviar" class="btn btn-primario">Enviar igual</button>
+        <button value="cancelar" class="btn btn-secundario">Volver al formulario</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgTraza" class="dialogo dialogo-ancho" aria-labelledby="dlgTrazaTitulo">
+    <form method="dialog">
+      <h2 id="dlgTrazaTitulo">Trazabilidad del resultado</h2>
+      <div id="dlgTrazaCuerpo"></div>
+      <div class="acciones">
+        <button value="cerrar" class="btn btn-secundario">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/validacion.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/graficos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
