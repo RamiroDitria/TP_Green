@@ -234,9 +234,11 @@
         if (r.factor) estado.factores[bien] = { estado: 'ok', factor: r.factor, nota: r.nota };
         else estado.factores[bien] = manual ? { estado: 'manual', factor: manual } : { estado: 'falta' };
       } catch (err) {
+        if (err.status === 0) { estado.conexion = 'error'; estado.errorConexion = err.message; }
         estado.factores[bien] = manual ? { estado: 'manual', factor: manual, error: err.message } : { estado: 'error', error: err.message };
       }
     }));
+    pintarEstadoConexion();
     pintarFactores();
     recalcular();
   }
@@ -271,7 +273,7 @@
       } else {
         const motivo = {
           falta: 'La API no tiene este factor para ' + anio + '.',
-          error: 'No se pudo consultar: ' + (f.error || 'error de la API') + '.',
+          error: 'No se pudo consultar: ' + (f.error || 'error de la API').replace(/\.+$/, '') + '.',
           'sin-api': 'Sin API no se puede consultar el factor.'
         }[f.estado];
         origen = f.estado === 'falta' ? 'No está en la API' : 'Sin dato';
