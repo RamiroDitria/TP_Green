@@ -130,7 +130,7 @@
       aviso.innerHTML = '<p>Falta la dirección de la API central. Podés completar los formularios y ver el cálculo con un factor cargado a mano, pero no se envía nada hasta conectarla. <button type="button" class="enlace" data-ir="conexion">Cargar la dirección</button></p>';
       aviso.hidden = false;
     } else if (estado.conexion === 'error') {
-      aviso.innerHTML = '<p>' + esc(estado.errorConexion) + ' Lo que cargues queda guardado en este navegador y no se envía hasta que la API responda. <button type="button" class="enlace" data-ir="conexion">Revisar la conexión</button></p>';
+      aviso.innerHTML = '<p>' + esc(estado.errorConexion) + ' Lo que cargues queda guardado en este navegador y no se envía hasta que la API responda. <button type="button" class="enlace" data-reintentar="1">Reintentar ahora</button></p>';
       aviso.hidden = false;
     } else {
       aviso.hidden = true;
@@ -1184,6 +1184,8 @@
     document.addEventListener('click', (ev) => {
       const b = ev.target.closest('[data-ir]');
       if (b) C.irA(b.dataset.ir);
+      const r = ev.target.closest('[data-reintentar]');
+      if (r) conectar();
     });
 
     let resizeTimer;
